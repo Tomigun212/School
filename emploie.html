@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>School Manager - Emploi du Temps</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    body { background-color: #f3f3f3; padding: 20px; }
+
+    h1 { margin-bottom: 30px; }
+    #weekTitle { margin-bottom: 15px; font-weight: bold; font-size: 1.5rem; }
+    text-
+    #weekTable.fade-out { opacity: 0; transition: opacity 0.4s ease-out; }
+    #weekTable.fade-in { opacity: 1; transition: opacity 0.4s ease-in; }
+
+    th.editable-hour { cursor: pointer; user-select: none; }
+    td.editable { cursor: pointer; user-select: none; vertical-align: middle; }
+
+    #weekTable {
+  transition: opacity 0.4s ease-in-out;
+  opacity: 1;
+}
+
+    .header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .header a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .header a:hover {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+    .header a:active {
+      background-color: #ccc;
+      color: #000;
+    }
+
+#weekTable.fade-out {
+  opacity: 0;
+}
+#weekTable.fade-in {
+  opacity: 1;
+}
+    .icon-option {
+      font-size: 24px;
+      cursor: pointer;
+      margin: 5px;
+      padding: 8px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      display: inline-block;
+      width: 40px;
+      text-align: center;
+    }
+    .icon-option.selected {
+      border-color: #4CAF50;
+      background-color: #d4edda;
+      color: #27632a;
+    }
+
+    #menuBtn {
+      position: relative;
+      top: 20px;
+      left: 20px;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 1000;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #menuPopup {
+      position: fixed;
+      top: 70px;
+      left: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+      padding: 10px 15px;
+      display: none;
+      z-index: 1000;
+      min-width: 160px;
+    }
+    #menuPopup button {
+      width: 100%;
+      margin: 5px 0;
+      background: #4CAF50;
+      border: none;
+      color: white;
+      font-weight: 600;
+      border-radius: 6px;
+      padding: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    #menuPopup button:hover {
+      background: #388e3c;
+    }
+
+    .modal-header {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .color-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  cursor: pointer;
+}
+.color-swatch:hover {
+  border-color: #333;
+}
+
+
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 12px;
+        padding: 6px;
+      }
+      .icon-option {
+        font-size: 20px;
+        width: 36px;
+        padding: 6px;
+      }
+      
+    }
+  </style>
+</head>
+<body>
+
+    <div class="header">
+  <h1>Emploi du Temps - School Manager</h1>
+  <a href="Index.html"> Acceuil</a>
+  <a href="devoir.html">Mes Devoirs</a>
+  <a href="notes.html">Mes Notes</a>
+  <a href="">Mon Emploi du Temps</a>
+  <a href="">Chat</a>
+</div>
+
+<button id="menuBtn" aria-label="Ouvrir menu hamburger" aria-haspopup="true" aria-expanded="false" title="Menu">
+  <i class="fa fa-bars"></i>
+</button>
+<div id="menuPopup" role="menu" aria-hidden="true">
+  <button id="exportPdfBtn" role="menuitem">Exporter en PDF</button>
+  <button id="resetBtn" role="menuitem">Réinitialiser semaine</button>
+</div>
+<br>
+<br>
+<center>
+<div class="d-flex align-items-center mb-3">
+  <button id="prevWeek" class="btn btn-outline-success me-2" aria-label="Semaine précédente"><i class="fa fa-chevron-left"></i></button>
+  <div id="weekTitle" aria-live="polite" aria-atomic="true">Semaine 1</div>
+  <button id="nextWeek" class="btn btn-outline-success ms-2" aria-label="Semaine suivante"><i class="fa fa-chevron-right"></i></button>
+</div>
+</center>
+
+<div id="weekTable" class="fade-in" tabindex="0" aria-label="Tableau emploi du temps"></div>
+
+<button id="addHourBtn" class="btn btn-success mt-3" aria-label="Ajouter une nouvelle plage horaire">
+  <i class="fa fa-plus"></i> Ajouter une heure
+</button>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" id="editForm" onsubmit="event.preventDefault(); saveEdit();">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editModalLabel">Modifier la case</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <label for="subjectInput" class="form-label">Matière</label>
+        <input type="text" id="subjectInput" class="form-control" placeholder="Ex: Mathématiques" autocomplete="off" />
+
+        <label for="colorInput" class="form-label mt-3">Couleur</label>
+        <input type="color" id="colorInput" class="form-control form-control-color" value="#4caf50" title="Choisir une couleur" />
+<div class="mt-2">
+  <button type="button" class="btn btn-outline-success btn-sm" onclick="addFavoriteColor()">Ajouter cette couleur aux favoris</button>
+</div>
+
+<label class="form-label mt-3">Couleurs enregistrées</label>
+<div id="savedColors" class="d-flex flex-wrap gap-2"></div>
+
+        <label class="form-label mt-3">Icône</label>
+        <div id="iconSelector" aria-label="Sélection d'icône">
+          <i class="fa-solid fa-calculator icon-option" tabindex="0" role="button" data-icon="fa-calculator" title="Calculatrice"></i>
+          <i class="fa-solid fa-book icon-option" tabindex="0" role="button" data-icon="fa-book" title="Livre"></i>
+          <i class="fa-solid fa-atom icon-option" tabindex="0" role="button" data-icon="fa-atom" title="Atome"></i>
+          <i class="fa-solid fa-landmark icon-option" tabindex="0" role="button" data-icon="fa-landmark" title="Monument"></i>
+          <i class="fa-solid fa-language icon-option" tabindex="0" role="button" data-icon="fa-language" title="Langue"></i>
+          <i class="fa-solid fa-futbol icon-option" tabindex="0" role="button" data-icon="fa-futbol" title="Sport"></i>
+          <i class="fa-solid fa-pen icon-option" tabindex="0" role="button" data-icon="" title="Aucune icône"></i>
+        </div>
+        <input type="hidden" id="iconInput" />
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-success">Enregistrer</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  const jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi"];
+  const horairesInitiaux = ["08:00 - 09:00", "09:00 - 10:00"];
+
+  const matieresParDefaut = {
+    "Mathématiques": { couleur: "#ff9999", icone: "fa-calculator" },
+    "Français": { couleur: "#99ccff", icone: "fa-book" },
+    "Physique": { couleur: "#99ff99", icone: "fa-atom" },
+    "Histoire": { couleur: "#ffcc99", icone: "fa-landmark" },
+    "Anglais": { couleur: "#cc99ff", icone: "fa-language" },
+    "Sport": { couleur: "#ffccff", icone: "fa-futbol" }
+  };
+
+  let currentWeek = detectCurrentWeek();
+  const data = { week1: [], week2: [] };
+  let editingCell = null;
+  const modalElement = document.getElementById('editModal');
+  const modal = new bootstrap.Modal(modalElement);
+
+  function loadFromLocalStorage() {
+    const saved = localStorage.getItem('emploi_du_temps');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      data.week1 = parsed.week1 || [];
+      data.week2 = parsed.week2 || [];
+    } else {
+      initWeekData('week1');
+      initWeekData('week2');
+    }
+  }
+
+  function saveToLocalStorage() {
+    localStorage.setItem('emploi_du_temps', JSON.stringify(data));
+  }
+
+  function initWeekData(week) {
+    data[week] = horairesInitiaux.map(h => {
+      const row = { heure: h };
+      jours.forEach(j => row[j] = { matiere: '', couleur: '', icone: '' });
+      return row;
+    });
+  }
+
+  function detectCurrentWeek() {
+    const today = new Date();
+    const weekNum = getWeekNumber(today);
+    return weekNum % 2 === 0 ? 2 : 1;
+  }
+
+  function getWeekNumber(d) {
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  }
+
+  function createTable(week) {
+    const container = document.getElementById("weekTable");
+
+    container.classList.add("fade-out");
+
+    setTimeout(() => {
+      let html = '<table class="table table-bordered text-center align-middle" role="grid">';
+      html += '<thead><tr><th scope="col">Heures</th>';
+      jours.forEach(j => html += `<th scope="col">${j}</th>`);
+      html += '</tr></thead><tbody>';
+
+      data[week].forEach((row, rIndex) => {
+        html += `<tr>
+          <th scope="row" tabindex="0" role="button" aria-label="Modifier l'heure ${row.heure}" class="editable-hour" onclick="editHour('${week}', ${rIndex})">${row.heure}</th>`;
+        jours.forEach(jour => {
+          const cell = row[jour] || { matiere: '', couleur: '', icone: '' };
+          html += `<td tabindex="0" role="button" aria-label="Modifier la case ${jour}, plage ${rIndex + 1}" style="background:${cell.couleur}" class="editable" onclick="openEdit('${week}', ${rIndex}, '${jour}')">
+            ${cell.icone ? `<i class="fa-solid ${cell.icone}"></i><br>` : ''}
+            ${cell.matiere}
+          </td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+
+      container.innerHTML = html;
+      document.getElementById("weekTitle").innerText = "Semaine " + (week === "week1" ? "1" : "2");
+
+      container.classList.remove("fade-out");
+      container.classList.add("fade-in");
+
+      setTimeout(() => container.classList.remove("fade-in"), 400);
+    }, 400);
+  }
+
+  function addHourRow() {
+    const week = currentWeek === 1 ? 'week1' : 'week2';
+    data[week].push({
+      heure: "Nouvelle heure",
+      ...Object.fromEntries(jours.map(j => [j, { matiere:'', couleur:'', icone:'' }]))
+    });
+    saveToLocalStorage();
+    createTable(week);
+  }
+
+  function editHour(week, index) {
+    const newHour = prompt("Nouvelle heure :", data[week][index].heure);
+    if (newHour) {
+      data[week][index].heure = newHour;
+      saveToLocalStorage();
+      createTable(week);
+    }
+  }
+  function openEdit(week, rowIndex, jour) {
+    editingCell = { week, rowIndex, jour };
+    const cell = data[week][rowIndex][jour] || {};
+    const matiere = cell.matiere || '';
+
+    const def = matieresParDefaut[matiere] || { couleur: '#4caf50', icone: '' };
+
+    document.getElementById('subjectInput').value = matiere;
+    document.getElementById('colorInput').value = cell.couleur || def.couleur;
+    document.getElementById('iconInput').value = cell.icone || def.icone;
+
+    document.querySelectorAll('.icon-option').forEach(i => {
+      i.classList.toggle('selected', i.dataset.icon === (cell.icone || def.icone));
+    });
+
+    modal.show();
+  }
+
+  function saveEdit() {
+    const { week, rowIndex, jour } = editingCell;
+    const matiere = document.getElementById('subjectInput').value.trim();
+    const couleur = document.getElementById('colorInput').value;
+    const icone = document.getElementById('iconInput').value;
+    data[week][rowIndex][jour] = { matiere, couleur, icone };
+    saveToLocalStorage();
+    createTable(week);
+    modal.hide();
+  }
+
+  document.querySelectorAll('.icon-option').forEach(icon => {
+    icon.addEventListener('click', () => {
+      document.querySelectorAll('.icon-option').forEach(i => i.classList.remove('selected'));
+      icon.classList.add('selected');
+      document.getElementById('iconInput').value = icon.dataset.icon;
+    });
+    icon.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        icon.click();
+      }
+    });
+  });
+
+  async function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("Emploi du temps - Semaine " + currentWeek, 10, 15);
+
+    let y = 25;
+    const week = currentWeek === 1 ? 'week1' : 'week2';
+
+    data[week].forEach(row => {
+      let line = row.heure + " : ";
+      jours.forEach(j => {
+        const cell = row[j];
+        if(cell && cell.matiere) {
+          line += `${j}(${cell.matiere}) `;
+        }
+      });
+      doc.setFontSize(12);
+      doc.text(line, 10, y);
+      y += 10;
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+      }
+    });
+
+    doc.save(`emploi_du_temps_semaine_${currentWeek}.pdf`);
+    closeMenu();
+  }
+  function resetCurrentWeek() {
+    if (confirm("Voulez-vous vraiment réinitialiser la semaine ?")) {
+      const week = currentWeek === 1 ? 'week1' : 'week2';
+      initWeekData(week);
+      saveToLocalStorage();
+      createTable(week);
+      closeMenu();
+    }
+  }
+
+  function switchWeek(delta) {
+    currentWeek = currentWeek === 1 ? 2 : 1;
+    createTable(currentWeek === 1 ? 'week1' : 'week2');
+  }
+
+  const menuBtn = document.getElementById('menuBtn');
+  const menuPopup = document.getElementById('menuPopup');
+
+  function openMenu() {
+    menuPopup.style.display = 'block';
+menuBtn.setAttribute('aria-expanded', 'true');
+menuPopup.setAttribute('aria-hidden', 'false');
+}
+
+function closeMenu() {
+menuPopup.style.display = 'none';
+menuBtn.setAttribute('aria-expanded', 'false');
+menuPopup.setAttribute('aria-hidden', 'true');
+}
+
+menuBtn.addEventListener('click', () => {
+const isVisible = menuPopup.style.display === 'block';
+isVisible ? closeMenu() : openMenu();
+});
+
+document.addEventListener('click', e => {
+if (!menuPopup.contains(e.target) && !menuBtn.contains(e.target)) {
+closeMenu();
+}
+});
+
+document.getElementById('addHourBtn').onclick = addHourRow;
+document.getElementById('prevWeek').onclick = switchWeek;
+document.getElementById('nextWeek').onclick = switchWeek;
+document.getElementById('exportPdfBtn').onclick = exportPDF;
+document.getElementById('resetBtn').onclick = resetCurrentWeek;
+
+loadFromLocalStorage();
+createTable(currentWeek === 1 ? 'week1' : 'week2');
+
+function addFavoriteColor() {
+  const color = document.getElementById('colorInput').value;
+  const saved = JSON.parse(localStorage.getItem('couleurs_favorites') || '[]');
+
+  if (!saved.includes(color)) {
+    saved.push(color);
+    localStorage.setItem('couleurs_favorites', JSON.stringify(saved));
+    renderSavedColors();
+  }
+}
+
+function renderSavedColors() {
+  const container = document.getElementById('savedColors');
+  container.innerHTML = '';
+  const saved = JSON.parse(localStorage.getItem('couleurs_favorites') || '[]');
+
+  saved.forEach(c => {
+    const swatch = document.createElement('div');
+    swatch.className = 'color-swatch';
+    swatch.style.backgroundColor = c;
+    swatch.title = c;
+    swatch.onclick = () => {
+      document.getElementById('colorInput').value = c;
+    };
+    container.appendChild(swatch);
+  });
+}
+
+modalElement.addEventListener('show.bs.modal', () => {
+  renderSavedColors();
+});
+
+</script>
+
+</body> 
+</html>
