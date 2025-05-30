@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School Manage - Notes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f3f3f3; }
+    .header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .header a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .header a:hover {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+    .header a:active {
+      background-color: #ccc;
+      color: #000;
+    }
+    .float-button {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 30px;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      text-align: center;
+      line-height: 60px;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .note {
+      background-color: #fff;
+      border-radius: 10px;
+      margin: 10px 0;
+      padding: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .note button {
+      margin-right: 5px;
+    }
+    #form-section {
+      display: none;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>School Manage</h1>
+  <a href="devoir.html">Mes Devoirs</a>
+  <a href="">Mes Notes</a>
+  <a href="">Mon Emploi du Temps</a>
+  <a href="">Chat</a>
+</div>
+
+<div class="container mt-4">
+  <input type="text" id="search-input" class="form-control mb-3" placeholder="🔍 Rechercher une note...">
+  
+  <div class="form-section" id="form-section">
+    <h4>Ajouter une Note</h4>
+    <input type="text" id="note-title" class="form-control mb-2" placeholder="Titre de la note">
+    <select id="note-type" class="form-select mb-2">
+      <option value="Cours">📘 Cours</option>
+      <option value="Post-it">🗒️ Post-it</option>
+    </select>
+    <textarea id="note-content" class="form-control mb-2" placeholder="Contenu de la note..."></textarea>
+    <button class="btn btn-success" onclick="saveNote()">Sauvegarder</button>
+  </div>
+
+  <div id="notes-list"></div>
+</div>
+
+<div class="float-button" onclick="toggleForm()">+</div>
+
+<!-- Modale Bootstrap pour modification -->
+<div class="modal fade" id="editNoteModal" tabindex="-1" aria-labelledby="editNoteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editNoteModalLabel">Modifier la Note</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="edit-note-title" class="form-control mb-2" placeholder="Titre de la note">
+        <select id="edit-note-type" class="form-select mb-2">
+          <option value="Cours">📘 Cours</option>
+          <option value="Post-it">🗒️ Post-it</option>
+        </select>
+        <textarea id="edit-note-content" class="form-control mb-2" placeholder="Contenu de la note..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-success" onclick="updateNote()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  let editIndex = null;
+
+  function toggleForm() {
+    const section = document.getElementById("form-section");
+    section.style.display = section.style.display === "block" ? "none" : "block";
+    if (section.style.display === "block") {
+      document.getElementById("note-title").focus();
+    }
+  }
+
+  function getTodayDate() {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  function saveNote() {
+    const titleInput = document.getElementById("note-title").value.trim();
+    const type = document.getElementById("note-type").value;
+    const content = document.getElementById("note-content").value.trim();
+    if (!titleInput || !content) {
+      alert("Le titre et le contenu ne peuvent pas être vides.");
+      return;
+    }
+    const date = getTodayDate();
+    const fullTitle = `[${date}] ${titleInput}`;
+    const note = { title: fullTitle, type, content };
+    const notes = JSON.parse(localStorage.getItem("notes")) || [];
+    notes.push(note);
+    localStorage.setItem("notes", JSON.stringify(notes));
+    document.getElementById("note-title").value = "";
+    document.getElementById("note-content").value = "";
+    toggleForm();
+    loadNotes();
+  }
+
+  function editNote(index) {
+    const notes = JSON.parse(localStorage.getItem("notes")) || [];
+    const note = notes[index];
+    const titleWithoutDate = note.title.replace(/^\[\d{2}\/\d{2}\/\d{4}\]\s*/, '');
+    document.getElementById("edit-note-title").value = titleWithoutDate;
+    document.getElementById("edit-note-type").value = note.type;
+    document.getElementById("edit-note-content").value = note.content;
+    editIndex = index;
+    new bootstrap.Modal(document.getElementById("editNoteModal")).show();
+  }
+
+  function updateNote() {
+    if (editIndex === null) return;
+    const title = document.getElementById("edit-note-title").value.trim();
+    const type = document.getElementById("edit-note-type").value;
+    const content = document.getElementById("edit-note-content").value.trim();
+    if (!title || !content) {
+      alert("Le titre et le contenu ne peuvent pas être vides.");
+      return;
+    }
+    const date = getTodayDate();
+    const fullTitle = `[${date}] ${title}`;
+    const notes = JSON.parse(localStorage.getItem("notes")) || [];
+    notes[editIndex] = { title: fullTitle, type, content };
+    localStorage.setItem("notes", JSON.stringify(notes));
+    editIndex = null;
+    bootstrap.Modal.getInstance(document.getElementById("editNoteModal")).hide();
+    loadNotes();
+  }
+
+  function deleteNote(index) {
+    if (!confirm("❗Es-tu sûr de vouloir supprimer cette note ?")) return;
+    const notes = JSON.parse(localStorage.getItem("notes")) || [];
+    notes.splice(index, 1);
+    localStorage.setItem("notes", JSON.stringify(notes));
+    loadNotes();
+  }
+
+  function downloadNote(index) {
+    const notes = JSON.parse(localStorage.getItem("notes")) || [];
+    const note = notes[index];
+    const blob = new Blob([`Titre : ${note.title}\nType : ${note.type}\n\n${note.content}`], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = note.title.replace(/\s+/g, "_") + ".txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function toggleDetails(button) {
+    const content = button.parentElement.querySelector(".content");
+    content.style.display = content.style.display === "block" ? "none" : "block";
+  }
+
+  function loadNotes() {
+    const list = document.getElementById("notes-list");
+    const search = document.getElementById("search-input").value.toLowerCase();
+    const notes = JSON.parse(localStorage.getItem("notes")) || [];
+    list.innerHTML = "";
+    notes.forEach((note, i) => {
+      if (!note.title.toLowerCase().includes(search) && !note.content.toLowerCase().includes(search)) return;
+      const div = document.createElement("div");
+      div.className = "note";
+      div.innerHTML = `
+        <h5>${note.type} - ${note.title}</h5>
+        <p>${note.content.substring(0, 100)}${note.content.length > 100 ? "..." : ""}</p>
+        <button class="btn btn-primary btn-sm" onclick="toggleDetails(this)">Voir détails</button>
+        <button class="btn btn-secondary btn-sm" onclick="editNote(${i})">✏️ Modifier</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteNote(${i})">🗑️ Supprimer</button>
+        <button class="btn btn-outline-dark btn-sm" onclick="downloadNote(${i})">📄 Télécharger</button>
+        <div class="content mt-2" style="display:none">${note.content}</div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  document.getElementById("search-input").addEventListener("input", loadNotes);
+  window.onload = loadNotes;
+</script>
+</body>
+</html>
