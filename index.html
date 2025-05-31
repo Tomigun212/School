@@ -47,8 +47,6 @@
     .btn-main:hover {
       background-color: #45a049;
     }
-
-     /* Style du fond de la modale */
     .popup {
       display: none; /* Caché par défaut */
       position: fixed;
@@ -59,7 +57,6 @@
       align-items: center;
     }
 
-    /* Contenu de la modale */
     .popup-content {
       background: white;
       padding: 20px;
@@ -111,14 +108,12 @@
 </head>
 <body>
 
-  <!-- Navigation -->
   <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
       <a class="navbar-brand" href="#">School Manager</a>s
     </div>
   </nav>
 
-  <!-- Section Hero -->
   <section class="hero">
     <div class="container">
       <h1>Bienvenue sur School Manager</h1>
@@ -131,7 +126,7 @@
       <p>Choisis ta destination</p>
         <button class="btn btn-main btn-lg text-white"onclick="window.location.href='devoir.html'">Mes Devoir</button>
 <br>
-        <button class="btn btn-main btn-lg text-white"onclick="window.location.href='notes.html'">Mes Notes </button>
+        <button class="btn btn-main btn-lg text-white"onclick="window.location.href='notes.html'">Mes Cours </button>
 <br>
         <button class="btn btn-main btn-lg text-white"onclick="window.location.href='emploie.html'">Mon Emploie du temp</button>
         <br>
@@ -141,7 +136,6 @@
     </div>
   </section>
 
-  <!-- Section À propos -->
   <section class="about text-center">
     <div class="container">
       <h2 class="mb-4">Pourquoi School Manager ?</h2>
@@ -149,7 +143,6 @@
     </div>
   </section>
 
-  <!-- Section Fonctionnalités -->
   <section class="features">
     <div class="container">
       <div class="row text-center">
@@ -177,12 +170,10 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer>
     <p>© 2025 School Manager. Tous droits réservés.</p>
   </footer>
 
-    <!-- Script pour ouvrir/fermer -->
   <script>
     function openPopup() {
       document.getElementById("popup").style.display = "flex";
