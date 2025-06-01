@@ -14,25 +14,22 @@
       position: relative;
     }
     .header a {
-  color: white;
-  margin: 0 15px;
-  text-decoration: none;
-  font-weight: bold;
-  padding: 6px 12px;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-}
-
-.header a:hover {
-  background-color: #e0e0e0;
-  color: #333;
-}
-
-.header a:active {
-  background-color: #ccc;
-  color: #000;
-}
-
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .header a:hover {
+      background-color: #e0e0e0;
+      color: #333;
+    }
+    .header a:active {
+      background-color: #ccc;
+      color: #000;
+    }
     .menu-icon {
       font-size: 24px;
       cursor: pointer;
@@ -69,42 +66,113 @@
     }
     .done { background-color: #d4edda !important; }
     .in-progress { background-color: #fff3cd !important; }
+    .a-faire { background-color: #f8d7da !important; } 
+    .matiere-maths { border-left: 5px solid #f39c12; }
+    .matiere-francais { border-left: 5px solid #2980b9; }
+    .matiere-histoire { border-left: 5px solid #27ae60; }
+    .matiere-anglais { border-left: 5px solid #8e44ad; }
+    #progressBarContainer {
+      background: #e0e0e0;
+      border-radius: 10px;
+      height: 20px;
+      margin: 5px 0 20px;
+      width: 100%;
+    }
+    #progressBar {
+      height: 100%;
+      background-color: #4caf50;
+      border-radius: 10px;
+      width: 0;
+      transition: width 0.4s ease;
+    }
+    #controls {
+      margin: 20px 0;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    #controls input, #controls select {
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      min-width: 150px;
+    }
+    .badge-statut {
+      font-weight: bold;
+      padding: 0.25em 0.6em;
+      border-radius: 0.25rem;
+      font-size: 0.9em;
+      user-select: none;
+    }
+    .badge-a-faire { background-color: #f8d7da; color: #721c24; }
+    .badge-en-cours { background-color: #fff3cd; color: #856404; }
+    .badge-termine { background-color: #d4edda; color: #155724; }
+
+    #progressText {
+      font-weight: bold;
+      margin-bottom: 5px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <span class="menu-icon" onclick="toggleMenu()">☰</span>
-    <h1 class="text-center">School Manager - Devoir </h1>
+    <h1 class="text-center">School Manager - Devoir</h1>
     <div class="text-center">
-<a href="index.html">Acceuil</a>
-<a href="">Mes Devoirs</a>
-<a href="notes.html">Mes Notes</a>
-<a href="emploie.html">Mon Emploi du Temps</a>
-<a href="">Chat</a>
+      <a href="Index.html">Accueil</a>
+      <a href="">Mes Devoirs</a>
+      <a href="notes.html">Mes Notes</a>
+      <a href="emploie.html">Mon Emploi du Temps</a>
+      <a href="mind.html">Cartes Mentales</a>
     </div>
     <div class="menu-popup" id="menuPopup">
       <button class="btn btn-danger btn-sm" onclick="supprimerTousLesDevoirs()">🗑 Supprimer toutes les données</button>
     </div>
   </div>
 
-  <div class="container mt-4" id="listeDevoirs"></div>
+  <div class="container mt-4">
+
+    <div id="controls">
+      <input type="text" id="recherche" placeholder="Recherche titre, matière, description" oninput="chargerDevoirs()" />
+      <select id="filtreStatut" onchange="chargerDevoirs()">
+        <option value="tout">Tous statuts</option>
+        <option value="à faire">📌 À faire</option>
+        <option value="en cours">🟡 En cours</option>
+        <option value="terminé">✅ Terminé</option>
+      </select>
+      <select id="tri" onchange="chargerDevoirs()">
+        <option value="date">Trier par date</option>
+        <option value="matiere">Trier par matière</option>
+      </select>
+    </div>
+
+    <div id="progressText">0/0 devoirs réalisés</div>
+    <div id="progressBarContainer" title="Progression des devoirs terminés">
+      <div id="progressBar"></div>
+    </div>
+
+    <div id="listeDevoirs"></div>
+  </div>
+
   <div class="float-button" onclick="ouvrirFormulaire()">+</div>
 
-  <!-- Modal pour ajouter/modifier -->
-  <div class="modal fade" id="devoirModal" tabindex="-1">
+  <div class="modal fade" id="devoirModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <form class="modal-content" id="devoirForm">
         <div class="modal-header">
           <h5 class="modal-title" id="modalTitle">Ajouter un devoir</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
         </div>
         <div class="modal-body">
-          <input type="hidden" id="indexDevoir">
+          <input type="hidden" id="indexDevoir" />
           <div class="mb-3">
             <input type="text" class="form-control" id="titre" placeholder="Titre du devoir" required />
           </div>
           <div class="mb-3">
-            <input type="text" class="form-control" id="matiere" placeholder="Matière" required />
+            <input type="text" class="form-control" id="matiere" placeholder="Matière (ex : Maths)" required />
           </div>
           <div class="mb-3">
             <input type="date" class="form-control" id="date" required />
@@ -119,11 +187,15 @@
               <option value="terminé">✅ Terminé</option>
             </select>
           </div>
+<div class="mb-3">
+  <label>Liens utiles :</label>
+  <div id="liensContainer"></div>
+  <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="ajouterChampLien()">➕ Ajouter un lien</button>
+</div>
+
           <div class="mb-3">
-            <input type="url" class="form-control" id="url" placeholder="Lien vers un document (facultatif)" />
-          </div>
-          <div class="mb-3">
-            <input type="file" class="form-control" id="fichier" />
+            <label for="fichier">Fichier (optionnel) :</label>
+            <input type="file" class="form-control" id="fichier" accept="*/*" />
           </div>
         </div>
         <div class="modal-footer">
@@ -135,107 +207,223 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    const liste = document.getElementById("listeDevoirs");
-    const modal = new bootstrap.Modal(document.getElementById("devoirModal"));
-    const menuPopup = document.getElementById("menuPopup");
-    let devoirs = [];
+<script>
+  const liste = document.getElementById("listeDevoirs");
+  const modalElement = document.getElementById("devoirModal");
+  const modal = new bootstrap.Modal(modalElement);
+  const menuPopup = document.getElementById("menuPopup");
+  const progressText = document.getElementById("progressText");
+  const progressBar = document.getElementById("progressBar");
 
-    function toggleMenu() {
-      menuPopup.style.display = menuPopup.style.display === "block" ? "none" : "block";
+  let devoirs = [];
+
+  const matiereColors = {
+    "maths": "matiere-maths",
+    "français": "matiere-francais",
+    "francais": "matiere-francais",
+    "histoire": "matiere-histoire",
+    "anglais": "matiere-anglais"
+  };
+
+  const statutEmojis = {
+    "à faire": "📌",
+    "en cours": "🟡",
+    "terminé": "✅"
+  };
+
+  function toggleMenu() {
+    menuPopup.style.display = menuPopup.style.display === "block" ? "none" : "block";
+  }
+
+  function chargerDevoirs() {
+    devoirs = JSON.parse(localStorage.getItem("devoirs") || "[]");
+
+    const recherche = document.getElementById("recherche").value.toLowerCase();
+    const filtreStatut = document.getElementById("filtreStatut").value;
+    const tri = document.getElementById("tri").value;
+
+    let filtered = devoirs.filter(d => {
+      const matiereLower = (d.matiere || "").toLowerCase();
+      const titreLower = (d.titre || "").toLowerCase();
+      const descLower = (d.description || "").toLowerCase();
+      const statut = d.statut || "";
+
+      const matchesRecherche = titreLower.includes(recherche) || matiereLower.includes(recherche) || descLower.includes(recherche);
+      const matchesStatut = filtreStatut === "tout" || statut === filtreStatut;
+
+      return matchesRecherche && matchesStatut;
+    });
+
+    if (tri === "date") {
+      filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
+    } else if (tri === "matiere") {
+      filtered.sort((a,b) => (a.matiere || "").localeCompare(b.matiere || ""));
     }
 
-    function chargerDevoirs() {
-      devoirs = JSON.parse(localStorage.getItem("devoirs") || "[]");
-      liste.innerHTML = "";
-      devoirs.forEach((devoir, index) => {
-        const div = document.createElement("div");
-        let statusClass = "";
-        if (devoir.statut === "terminé") statusClass = "done";
-        else if (devoir.statut === "en cours") statusClass = "in-progress";
+    const total = filtered.length;
+    const termines = filtered.filter(d => d.statut === "terminé").length;
+    const pct = total ? Math.round((termines / total) * 100) : 0;
 
-        div.className = "card mt-3 " + statusClass;
-        div.innerHTML = `
-          <div class="card-body">
-            <h5 class="card-title">${devoir.titre} - ${devoir.matiere}</h5>
-            <h6 class="card-subtitle text-muted mb-2">Pour le ${devoir.date} | Statut : <strong>${devoir.statut}</strong></h6>
-            <p class="card-text">${devoir.description || ""}</p>
-            ${devoir.url ? `<a href="${devoir.url}" class="btn btn-sm btn-primary me-2" target="_blank">🔗 Lien</a>` : ""}
-            ${devoir.fichier ? `<a href="${devoir.fichier}" class="btn btn-sm btn-secondary me-2" download>Télécharger le fichier</a>` : ""}
-            <button class="btn btn-sm btn-outline-success me-2" onclick="changerStatut(${index})">Changer Statut</button>
-            <button class="btn btn-sm btn-warning" onclick="modifierDevoir(${index})">Modifier</button>
-          </div>
-        `;
-        liste.appendChild(div);
+    progressText.textContent = `${termines} / ${total} devoirs réalisés`;
+    progressBar.style.width = pct + "%";
+    progressBar.title = `Progression: ${pct}% (${termines} sur ${total} terminés)`;
+
+    liste.innerHTML = "";
+    filtered.forEach((d, index) => {
+      const card = document.createElement("div");
+      card.className = "card mb-3 p-3 " + (d.statut === "à faire" ? "a-faire" : d.statut === "en cours" ? "in-progress" : "done");
+      
+      const matClass = matiereColors[(d.matiere || "").toLowerCase()];
+      if (matClass) card.classList.add(matClass);
+
+      let liensHtml = "";
+      if (d.liens && d.liens.length > 0) {
+        liensHtml = d.liens.map((l, i) => {
+          const boutonTexte = l.titre && l.titre.trim() !== "" ? l.titre : l.url;
+          return `<a href="${l.url}" target="_blank" class="btn btn-outline-primary btn-sm me-2 mb-2">${boutonTexte}</a>`;
+        }).join("");
+      }
+
+      const dateFormat = d.date ? new Date(d.date).toLocaleDateString('fr-FR') : "";
+
+      card.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5>${d.titre} <small>(${d.matiere})</small></h5>
+          <span class="badge-statut badge-${d.statut.replace(" ", "-")}">${statutEmojis[d.statut] || ""} ${d.statut}</span>
+        </div>
+        <p>${d.description || ""}</p>
+        <p><strong>Date :</strong> ${dateFormat}</p>
+        <div>${liensHtml}</div>
+        <div class="mt-2">
+          <button class="btn btn-sm btn-primary" onclick="changerStatut(${index})">Changer statut</button>
+          <button class="btn btn-sm btn-warning" onclick="modifierDevoir(${index})">Modifier</button>
+          <button class="btn btn-sm btn-danger" onclick="supprimerDevoir(${index})">Supprimer</button>
+        </div>
+      `;
+      liste.appendChild(card);
+    });
+  }
+
+  function ouvrirFormulaire() {
+    document.getElementById("devoirForm").reset();
+    document.getElementById("indexDevoir").value = "";
+    document.getElementById("liensContainer").innerHTML = "";
+    document.getElementById("modalTitle").textContent = "Ajouter un devoir";
+    modal.show();
+  }
+
+  function ajouterChampLien(titreLien = "", urlLien = "") {
+    const container = document.getElementById("liensContainer");
+    const div = document.createElement("div");
+    div.className = "d-flex gap-2 mb-2";
+    div.innerHTML = `
+      <input type="text" class="form-control" placeholder="Titre du lien" value="${titreLien}" required />
+      <input type="url" class="form-control" placeholder="URL du lien" value="${urlLien}" required />
+      <button type="button" class="btn btn-danger" onclick="this.parentNode.remove()">✖</button>
+    `;
+    container.appendChild(div);
+  }
+
+  document.getElementById("devoirForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const index = document.getElementById("indexDevoir").value;
+    const titre = document.getElementById("titre").value.trim();
+    const matiere = document.getElementById("matiere").value.trim();
+    const date = document.getElementById("date").value;
+    const description = document.getElementById("description").value.trim();
+    const statut = document.getElementById("statut").value;
+    const liensDivs = document.querySelectorAll("#liensContainer > div");
+    const liens = Array.from(liensDivs).map(div => {
+      const inputs = div.querySelectorAll("input");
+      return {
+        titre: inputs[0].value.trim(),
+        url: inputs[1].value.trim()
+      };
+    }).filter(l => l.url);
+
+    let fichierDataUrl = null;
+    const fichierInput = document.getElementById("fichier");
+    if (fichierInput.files.length > 0) {
+      const file = fichierInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        fichierDataUrl = event.target.result;
+        enregistrerDevoir(index, titre, matiere, date, description, statut, liens, fichierDataUrl);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      enregistrerDevoir(index, titre, matiere, date, description, statut, liens, fichierDataUrl);
+    }
+  });
+
+  function enregistrerDevoir(index, titre, matiere, date, description, statut, liens, fichierDataUrl) {
+    if (index === "") {
+      devoirs.push({ titre, matiere, date, description, statut, liens, fichier: fichierDataUrl });
+    } else {
+      devoirs[index] = { titre, matiere, date, description, statut, liens, fichier: fichierDataUrl };
+    }
+    localStorage.setItem("devoirs", JSON.stringify(devoirs));
+    modal.hide();
+    chargerDevoirs();
+  }
+
+  function modifierDevoir(index) {
+    const devoir = devoirs[index];
+    document.getElementById("indexDevoir").value = index;
+    document.getElementById("titre").value = devoir.titre;
+    document.getElementById("matiere").value = devoir.matiere;
+    document.getElementById("date").value = devoir.date;
+    document.getElementById("description").value = devoir.description;
+    document.getElementById("statut").value = devoir.statut;
+
+    const container = document.getElementById("liensContainer");
+    container.innerHTML = "";
+    if (devoir.liens && devoir.liens.length > 0) {
+      devoir.liens.forEach(({titre, url}) => {
+        ajouterChampLien(titre, url);
       });
     }
+    document.getElementById("modalTitle").textContent = "Modifier un devoir";
+    modal.show();
+  }
 
-    function ouvrirFormulaire() {
-      document.getElementById("devoirForm").reset();
-      document.getElementById("indexDevoir").value = "";
-      document.getElementById("modalTitle").textContent = "Ajouter un devoir";
-      modal.show();
-    }
-
-    function modifierDevoir(index) {
-      const devoir = devoirs[index];
-      document.getElementById("titre").value = devoir.titre;
-      document.getElementById("matiere").value = devoir.matiere;
-      document.getElementById("date").value = devoir.date;
-      document.getElementById("description").value = devoir.description;
-      document.getElementById("statut").value = devoir.statut || "à faire";
-      document.getElementById("url").value = devoir.url || "";
-      document.getElementById("indexDevoir").value = index;
-      modal.show();
-    }
-
-    function changerStatut(index) {
-      const ordre = ["à faire", "en cours", "terminé"];
-      let actuel = devoirs[index].statut || "à faire";
-      let suivant = ordre[(ordre.indexOf(actuel) + 1) % ordre.length];
-      devoirs[index].statut = suivant;
+  function supprimerDevoir(index) {
+    if (confirm("Voulez-vous vraiment supprimer ce devoir ?")) {
+      devoirs.splice(index, 1);
       localStorage.setItem("devoirs", JSON.stringify(devoirs));
       chargerDevoirs();
     }
+  }
 
-    function supprimerTousLesDevoirs() {
-      if (confirm("Voulez-vous vraiment tout supprimer ?")) {
-        localStorage.removeItem("devoirs");
-        chargerDevoirs();
-        toggleMenu();
-      }
-    }
+  function changerStatut(index) {
+    const d = devoirs[index];
+    if (d.statut === "à faire") d.statut = "en cours";
+    else if (d.statut === "en cours") d.statut = "terminé";
+    else d.statut = "à faire";
+    localStorage.setItem("devoirs", JSON.stringify(devoirs));
+    chargerDevoirs();
+  }
 
-    document.getElementById("devoirForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-      const titre = document.getElementById("titre").value;
-      const matiere = document.getElementById("matiere").value;
-      const date = document.getElementById("date").value;
-      const description = document.getElementById("description").value;
-      const statut = document.getElementById("statut").value;
-      const url = document.getElementById("url").value;
-      const fichierInput = document.getElementById("fichier");
-      const index = document.getElementById("indexDevoir").value;
-
-      let fichierBase64 = null;
-      if (fichierInput.files.length > 0) {
-        const file = fichierInput.files[0];
-        const reader = new FileReader();
-        fichierBase64 = await new Promise((resolve) => {
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        });
-      }
-
-      const devoir = { titre, matiere, date, description, statut, url, fichier: fichierBase64 };
-
-      if (index !== "") devoirs[index] = devoir;
-      else devoirs.push(devoir);
-
-      localStorage.setItem("devoirs", JSON.stringify(devoirs));
-      modal.hide();
+  function supprimerTousLesDevoirs() {
+    if (confirm("Voulez-vous vraiment supprimer tous les devoirs ?")) {
+      localStorage.removeItem("devoirs");
+      devoirs = [];
       chargerDevoirs();
-    });
+    }
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!menuPopup.contains(e.target) && !e.target.classList.contains("menu-icon")) {
+      menuPopup.style.display = "none";
+    }
+  });
+
+  chargerDevoirs();
+</script>
+</body>
+</html>
+
 
     window.onload = chargerDevoirs;
   </script>
