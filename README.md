@@ -1,12 +1,12 @@
-J'ai cree cette application pour tout le monde si vous shouaiter l'utiliser faite vous plaisir vous vouler la modifier fait vous plaisir aussi 
+J'ai créé cette application pour tout le monde. Si vous souhaitez l'utiliser, faites-vous plaisir. Vous voulez la modifier, faites-vous plaisir aussi 
 
-si vous constater un bug contacter moi sur discord tomigun21
+si vous constatez un bug, contactez-moi sur discord tomigun21
 
 
-Prochain Mise a jour 
+Prochain Mise à jour 
 
-- Systéme de TooDoo
-- Systéme de Cartes Mental
-- (Calculatrice Integré)
-- Aide a la revision
-- Bien Plus encore
+- Système de TooDoo
+- Système de Cartes Mentales
+- (Calculatrice Intégrée)
+- Aide à la révision
+- Bien plus encore
